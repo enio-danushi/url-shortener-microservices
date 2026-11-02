@@ -1,0 +1,52 @@
+name: ci
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# The workflow only needs to read the repository.
+permissions:
+  contents: read
+
+# A new push to the same pull request cancels the run it makes obsolete.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  links-image:
+    name: Build Links image
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build the image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: src/Links.Api/Dockerfile
+          tags: shortener-links:ci
+          load: true
+          cache-from: type=gha,scope=links
+          cache-to: type=gha,mode=max,scope=links
+
+      - name: Smoke test
+        run: |
+          docker run -d --name links -p 8080:8080 shortener-links:ci
+          for attempt in $(seq 1 20); do
+            if curl --silent --fail http://localhost:8080/health; then
+              echo " (attempt $attempt)"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Links did not answer /health. Container logs:"
+          docker logs links
+          exit 1
