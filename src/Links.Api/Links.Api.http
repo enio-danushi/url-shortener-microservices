@@ -1,6 +1,13 @@
 @Links.Api_HostAddress = http://localhost:5254
+@Links.Container_HostAddress = http://localhost:8080
 
 GET {{Links.Api_HostAddress}}/health/
+Accept: application/json
+
+###
+
+# Links in Docker (docker run -p 8080:8080 ...)
+GET {{Links.Container_HostAddress}}/health
 Accept: application/json
 
 ###

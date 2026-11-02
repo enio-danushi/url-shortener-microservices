@@ -1,0 +1,19 @@
+# Build output from your machine: never mix it into the Linux build
+**/bin/
+**/obj/
+
+# IDE and per-user files
+**/.vs/
+**/.vscode/
+**/.idea/
+**/*.user
+
+# Git history: large, and not needed to build an image
+.git/
+
+# Local secrets
+**/.env
+
+# Docker's own files: the builder still reads them, COPY skips them
+**/Dockerfile*
+**/.dockerignore

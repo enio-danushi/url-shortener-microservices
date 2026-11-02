@@ -5,5 +5,5 @@
 <!-- The reason, or the concept this step practises -->
 
 ## How I verified it
-- [ ] `dotnet build` passes
-- [ ] Ran it and checked:
+- [] `dotnet build` passes
+- [] Ran it and checked:
