@@ -11,6 +11,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapGet("/", () => "Links service is running");
-app.MapHealthChecks("/health");
+app.MapHealthChecks("/health")
 
 app.Run();
