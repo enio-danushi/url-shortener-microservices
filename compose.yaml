@@ -1,0 +1,23 @@
+name: shortener
+
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: shortener
+      POSTGRES_PASSWORD: shortener-dev
+      POSTGRES_DB: links
+    ports:
+      - "127.0.0.1:15432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "localhost", "-U", "shortener", "-d", "links"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+      start_interval: 1s
+
+volumes:
+  postgres-data:
