@@ -1,13 +1,48 @@
 @Links.Api_HostAddress = http://localhost:5254
 @Links.Container_HostAddress = http://localhost:8080
 
+# Where the requests below go: the IDE copy now, the container from Step 3.7 on.
+@host = {{Links.Api_HostAddress}}
+# Paste a code from a "Create a link" response here.
+@code = paste-a-code-here
+
 GET {{Links.Api_HostAddress}}/health/
 Accept: application/json
 
 ###
 
-# Links in Docker (docker run -p 8080:8080 ...)
+# Links in Docker (docker compose up)
 GET {{Links.Container_HostAddress}}/health
 Accept: application/json
+
+###
+
+# Create a link: 201 Created, with the new code in the body
+POST {{host}}/links
+Content-Type: application/json
+
+{
+  "url": "https://learn.microsoft.com/dotnet/"
+}
+
+###
+
+# Read it back: 200, or 404 for an unknown code
+GET {{host}}/links/{{code}}
+
+###
+
+# Disable it: 204, and disabledAt is set from now on
+POST {{host}}/links/{{code}}/disable
+
+###
+
+# Rejected: 400, only http and https URLs are accepted
+POST {{host}}/links
+Content-Type: application/json
+
+{
+  "url": "javascript:alert(1)"
+}
 
 ###
