@@ -2,7 +2,7 @@
 @Links.Container_HostAddress = http://localhost:8080
 
 # Where the requests below go: the IDE copy now, the container from Step 3.7 on.
-@host = {{Links.Api_HostAddress}}
+@host = {{Links.Container_HostAddress}}
 # Paste a code from a "Create a link" response here.
 @code = paste-a-code-here
 

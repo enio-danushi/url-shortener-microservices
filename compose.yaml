@@ -5,7 +5,7 @@ services:
     image: postgres:18
     environment:
       POSTGRES_USER: shortener
-      POSTGRES_PASSWORD: shortener-dev
+      POSTGRES_PASSWORD: shortener-dev # local throwaway password; never reuse it
       POSTGRES_DB: links
     ports:
       - "127.0.0.1:15432:5432"
@@ -18,6 +18,26 @@ services:
       retries: 3
       start_period: 30s
       start_interval: 1s
+
+  links:
+    build:
+      context: .
+      dockerfile: src/Links.Api/Dockerfile
+    image: shortener-links:dev
+    environment:
+      ConnectionStrings__Links: "Host=postgres;Port=5432;Database=links;Username=shortener;Password=shortener-dev"
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "--output", "/dev/null", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+      start_interval: 2s
 
 volumes:
   postgres-data:

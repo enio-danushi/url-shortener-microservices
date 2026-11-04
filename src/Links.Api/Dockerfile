@@ -14,6 +14,11 @@ RUN dotnet publish src/Links.Api/Links.Api.csproj -c Release -o /app/publish --n
 
 # Final stage: only the ASP.NET Core runtime plus the published output.
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+# curl, for the health check Compose runs inside the container. The .NET images
+# leave it out; installing it before the COPY keeps this layer cached.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends curl \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY --from=build /app/publish .
 USER $APP_UID
