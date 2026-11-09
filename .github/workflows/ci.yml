@@ -32,21 +32,27 @@ jobs:
         with:
           context: .
           file: src/Links.Api/Dockerfile
-          tags: shortener-links:ci
+          # The tag compose.yaml expects, so Compose runs this image instead of building its own.
+          tags: shortener-links:dev
           load: true
           cache-from: type=gha,scope=links
           cache-to: type=gha,mode=max,scope=links
 
+      - name: Start PostgreSQL and Links
+        run: docker compose up --no-build --wait --wait-timeout 120
+
       - name: Smoke test
         run: |
-          docker run -d --name links -p 8080:8080 shortener-links:ci
-          for attempt in $(seq 1 20); do
-            if curl --silent --fail http://localhost:8080/health; then
-              echo " (attempt $attempt)"
-              exit 0
-            fi
-            sleep 1
-          done
-          echo "Links did not answer /health. Container logs:"
-          docker logs links
-          exit 1
+          curl --fail --silent --show-error http://localhost:8080/health
+          echo
+          code=$(curl --fail --silent --show-error \
+            --header "Content-Type: application/json" \
+            --data '{"url":"https://example.com/"}' \
+            http://localhost:8080/links | jq --raw-output .code)
+          echo "Created link $code"
+          curl --fail --silent --show-error "http://localhost:8080/links/$code"
+          echo
+
+      - name: Show container logs
+        if: failure()
+        run: docker compose logs
