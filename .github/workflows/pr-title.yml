@@ -1,0 +1,32 @@
+name: pr-title
+
+on:
+  pull_request:
+    branches: [main]
+    # "edited" reruns the check when you fix the title, with no new commit.
+    types: [opened, edited, synchronize, reopened]
+
+# The check reads the event, never the repository, so the token gets no permissions.
+permissions: {}
+
+jobs:
+  title:
+    name: Pull request title
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check the title follows Conventional Commits
+        env:
+          # Untrusted text goes through an environment variable, never straight into the script.
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          echo "Title: $TITLE"
+          pattern='^(feat|fix|refactor|docs|test|build|ci|chore)(\([a-z-]+\))?: [^ ]'
+          if [[ ! "$TITLE" =~ $pattern ]]; then
+            echo "::error::Use 'type(scope): summary', for example 'feat(redirect): add the Redirect service'."
+            exit 1
+          fi
+          if (( ${#TITLE} > 72 )); then
+            echo "::error::The title has ${#TITLE} characters; keep it to 72 or fewer."
+            exit 1
+          fi
